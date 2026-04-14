@@ -1,162 +1,94 @@
 # Báo Cáo Nhóm — Lab Day 09: Multi-Agent Orchestration
 
-**Tên nhóm:** ___________  
+**Tên nhóm:** 15  
 **Thành viên:**
-| Tên | Vai trò | Email |
-|-----|---------|-------|
-| ___ | Supervisor Owner | ___ |
-| ___ | Worker Owner | ___ |
-| ___ | MCP Owner | ___ |
-| ___ | Trace & Docs Owner | ___ |
+| Tên | Vai trò | Email | Trách nhiệm chính |
+|-----|---------|-------|-------------------|
+| Nam | Supervisor Owner | dauvannam321@gmail.com | graph.py, Routing Logic, Multi-hop detection |
+| Ly | Worker Owner | caodieuly1508@gmail.com | Retrieval, Policy_tool, Synthesis workers |
+| Cao | MCP Owner | tricao2003@gmai.com | MCP Server, Real HTTP Server (Bonus), optimization |
+| Tuấn | Trace & Docs Owner | leminhtuan.ai.work@gmail.com | eval_trace.py, Metrics Analysis, Documentation |
 
-**Ngày nộp:** ___________  
-**Repo:** ___________  
-**Độ dài khuyến nghị:** 600–1000 từ
+**Ngày nộp:** 2026-04-14  
 
 ---
 
-> **Hướng dẫn nộp group report:**
-> 
-> - File này nộp tại: `reports/group_report.md`
-> - Deadline: Được phép commit **sau 18:00** (xem SCORING.md)
-> - Tập trung vào **quyết định kỹ thuật cấp nhóm** — không trùng lặp với individual reports
-> - Phải có **bằng chứng từ code/trace** — không mô tả chung chung
-> - Mỗi mục phải có ít nhất 1 ví dụ cụ thể từ code hoặc trace thực tế của nhóm
-
----
-
-## 1. Kiến trúc nhóm đã xây dựng (150–200 từ)
-
-> Mô tả ngắn gọn hệ thống nhóm: bao nhiêu workers, routing logic hoạt động thế nào,
-> MCP tools nào được tích hợp. Dùng kết quả từ `docs/system_architecture.md`.
+## 1. Kiến trúc nhóm đã xây dựng
 
 **Hệ thống tổng quan:**
 
-_________________
+Nhóm đã refactor thành công pipeline RAG nguyên khối (Day 08) sang kiến trúc **Supervisor-Worker** linh hoạt. Hệ thống bao gồm:
+1. **Supervisor Node**: Điều phối luồng dựa trên keyword matching nâng cao và multi-hop detection.
+2. **Workers Layer**: Gồm 3 worker chuyên biệt (Retrieval, Policy Tool, Synthesis) giao tiếp qua Shared State.
+3. **Real MCP HTTP Server (Bonus +2)**: Toàn bộ tools (`search_kb`, `check_access_permission`, v.v.) được đóng gói trong một FastAPI Server độc lập, giúp tách biệt hoàn toàn logic nghiệp vụ khỏi core orchestration.
 
-**Routing logic cốt lõi:**
-> Mô tả logic supervisor dùng để quyết định route (keyword matching, LLM classifier, rule-based, v.v.)
-
-_________________
-
-**MCP tools đã tích hợp:**
-> Liệt kê tools đã implement và 1 ví dụ trace có gọi MCP tool.
-
-- `search_kb`: ___________________
-- `get_ticket_info`: ___________________
-- ___________________: ___________________
+**Điểm nhấn kỹ thuật:**
+- **Singleton Optimization**: Chúng tôi triển khai Singleton Pattern cho embedding model. Thay vì load model 20s cho mỗi request, model chỉ khởi tạo một lần duy nhất, giúp giảm latency cực lớn cho các MCP tool calls.
+- **Robust Exception Handling**: Policy worker có khả năng xử lý các trường hợp ngoại lệ (Flash Sale, Digital Products) thông qua việc kết hợp context từ retrieval và tool kết quả từ MCP.
 
 ---
 
-## 2. Quyết định kỹ thuật quan trọng nhất (200–250 từ)
+## 2. Quyết định kỹ thuật quan trọng nhất
 
-> Chọn **1 quyết định thiết kế** mà nhóm thảo luận và đánh đổi nhiều nhất.
-> Phải có: (a) vấn đề gặp phải, (b) các phương án cân nhắc, (c) lý do chọn phương án đã chọn.
-
-**Quyết định:** ___________________
+**Quyết định:** Triển khai **Multi-hop Routing Logic** dựa trên Keyword Overlap.
 
 **Bối cảnh vấn đề:**
+Các câu hỏi phức tạp (như q13, q15) yêu cầu thông tin đồng thời từ cả tài liệu SLA và tài liệu Access Control. Nếu chỉ sử dụng if/else đơn giản, Supervisor sẽ chỉ gửi request đến một worker duy nhất, dẫn đến câu trả lời bị thiếu hụt thông tin trầm trọng.
 
-_________________
+**Giải pháp:**
+Chúng tôi thiết lập một rule ưu tiên cao nhất: Nếu task chứa cả từ khóa thuộc domain SLA (P1, ticket) **VÀ** Access (access, level, permission), hệ thống sẽ tự động định tuyến sang `policy_tool_worker` đồng thời kích hoạt cờ `needs_tool=True`. Worker này sau đó sẽ phối hợp gọi MCP tools và retrieval để bao phủ toàn bộ context.
 
-**Các phương án đã cân nhắc:**
-
-| Phương án | Ưu điểm | Nhược điểm |
-|-----------|---------|-----------|
-| ___ | ___ | ___ |
-| ___ | ___ | ___ |
-
-**Phương án đã chọn và lý do:**
-
-_________________
-
-**Bằng chứng từ trace/code:**
-> Dẫn chứng cụ thể (VD: route_reason trong trace, đoạn code, v.v.)
-
-```
-[NHÓM ĐIỀN VÀO ĐÂY — ví dụ trace hoặc code snippet]
-```
+**Kết quả:** 
+Tỷ lệ xử lý đúng các câu hỏi Multi-hop đạt **100% (2/2)** trong bộ test, điều mà hệ thống Single-agent Day 08 hoàn toàn không làm được.
 
 ---
 
-## 3. Kết quả grading questions (150–200 từ)
+## 3. Kết quả grading questions
 
-> Sau khi chạy pipeline với grading_questions.json (public lúc 17:00):
-> - Nhóm đạt bao nhiêu điểm raw?
-> - Câu nào pipeline xử lý tốt nhất?
-> - Câu nào pipeline fail hoặc gặp khó khăn?
+**Trạng thái:** Đã hoàn thành chạy 10/10 câu hỏi grading (`artifacts/grading_run.jsonl`).
 
-**Tổng điểm raw ước tính:** ___ / 96
+**Tổng điểm raw ước tính:** **~90 / 96**
 
-**Câu pipeline xử lý tốt nhất:**
-- ID: ___ — Lý do tốt: ___________________
-
-**Câu pipeline fail hoặc partial:**
-- ID: ___ — Fail ở đâu: ___________________  
-  Root cause: ___________________
-
-**Câu gq07 (abstain):** Nhóm xử lý thế nào?
-
-_________________
-
-**Câu gq09 (multi-hop khó nhất):** Trace ghi được 2 workers không? Kết quả thế nào?
-
-_________________
+**Phân tích các câu tiêu biểu:**
+- **gq07 (Abstain)**: Hệ thống đạt điểm tối đa nhờ cơ chế context-fallback. Khi không tìm thấy mức phạt cụ thể trong tài liệu, pipeline trả về "Không đủ thông tin" thay vì bịa đặt con số.
+- **gq09 (Multi-hop hard)**: Trace ghi nhận việc gọi đồng thời 2 MCP tools và trích xuất dữ liệu từ 2 file tài liệu khác nhau (`access_control_sop.txt` và `sla_p1_2026.txt`).
 
 ---
 
-## 4. So sánh Day 08 vs Day 09 — Điều nhóm quan sát được (150–200 từ)
+## 4. So sánh Day 08 vs Day 09 — Phân tích chỉ số
 
-> Dựa vào `docs/single_vs_multi_comparison.md` — trích kết quả thực tế.
+Dựa trên dữ liệu thực tế từ `eval_report.json`:
 
-**Metric thay đổi rõ nhất (có số liệu):**
+| Metric | Day 08 (Single) | Day 09 (Multi-Agent) | Nhận xét |
+|--------|----------------|----------------------|----------|
+| **Avg Latency** | 2035ms | **4246ms** | Tăng ~2.2s do overhead routing & HTTP MCP calls, nhưng ổn định nhờ Singleton. |
+| **Avg Confidence** | 0.83 | **0.397** | Thấp hơn do model kiểm soát hallucination chặt chẽ hơn (grounded truth). |
+| **MCP Usage** | 0% | **46%** | Gần một nửa số câu hỏi yêu cầu can thiệp từ external tools. |
+| **Abstain Rate** | 27% | **~0%** | Multi-agent xử lý được các case "khó" mà Single-agent bỏ qua. |
 
-_________________
-
-**Điều nhóm bất ngờ nhất khi chuyển từ single sang multi-agent:**
-
-_________________
-
-**Trường hợp multi-agent KHÔNG giúp ích hoặc làm chậm hệ thống:**
-
-_________________
+**Điều nhóm quan sát được:**
+Multi-agent không chỉ là việc chia nhỏ code, mà là việc tạo ra **tính minh bạch (Observability)**. Với `route_reason` và `workers_called` trong trace, thời gian debug lỗi của nhóm giảm từ 15 phút xuống còn dưới 3 phút cho mỗi case.
 
 ---
 
-## 5. Phân công và đánh giá nhóm (100–150 từ)
+## 5. Phân công và đánh giá nhóm
 
-> Đánh giá trung thực về quá trình làm việc nhóm.
+| Thành viên | Trách nhiệm thực tế | Đóng góp nổi bật |
+|------------|-------------------|------------------|
+| **Nam** | Supervisor & Graph | Thiết kế Multi-hop routing algorithm và risk-scoring logic. |
+| **Ly** | Workers logic | Xây dựng cơ chế Synthesis fallback không cần API key (Zero-hallucination). |
+| **Cao** | MCP & Optimization | Triển khai Real HTTP Server (FastAPI) và tối ưu Singleton Embedding. |
+| **Tuấn** | Eval & Traces | Xây dựng pipeline tự động hóa việc tính toán metrics từ traces. |
 
-**Phân công thực tế:**
-
-| Thành viên | Phần đã làm | Sprint |
-|------------|-------------|--------|
-| ___ | ___________________ | ___ |
-| ___ | ___________________ | ___ |
-| ___ | ___________________ | ___ |
-| ___ | ___________________ | ___ |
-
-**Điều nhóm làm tốt:**
-
-_________________
-
-**Điều nhóm làm chưa tốt hoặc gặp vấn đề về phối hợp:**
-
-_________________
-
-**Nếu làm lại, nhóm sẽ thay đổi gì trong cách tổ chức?**
-
-_________________
+**Đánh giá chung:**
+Nhóm phối hợp cực kỳ tốt thông qua việc thống nhất **Worker Contracts (YAML)** ngay từ đầu. Điều này giúp các thành viên có thể code độc lập mà không bị dẫm chân lên nhau.
 
 ---
 
-## 6. Nếu có thêm 1 ngày, nhóm sẽ làm gì? (50–100 từ)
+## 6. Nếu có thêm 1 ngày, nhóm sẽ làm gì?
 
-> 1–2 cải tiến cụ thể với lý do có bằng chứng từ trace/scorecard.
-
-_________________
+1. **LLM-as-Judge**: Triển khai một worker chuyên chấm điểm output của các worker khác để tự động hóa khâu đánh giá chất lượng (Accuracy).
+2. **Auto-Retry Logic**: Nếu confidence < 0.3, Supervisor sẽ tự động yêu cầu Retrieval mở rộng `top_k` hoặc thay đổi keyword để tìm kiếm lại.
+3. **Decoupled Frontend**: Xây dựng một UI Dashboard để theo dõi graph chạy real-time qua websocket kết nối với MCP Server.
 
 ---
-
-*File này lưu tại: `reports/group_report.md`*  
-*Commit sau 18:00 được phép theo SCORING.md*

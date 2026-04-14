@@ -30,32 +30,54 @@ WORKER_NAME = "policy_tool_worker"
 def _call_mcp_tool(tool_name: str, tool_input: dict) -> dict:
     """
     Gọi MCP tool.
-
-    Sprint 3 TODO: Implement bằng cách import mcp_server hoặc gọi HTTP.
-
-    Hiện tại: Import trực tiếp từ mcp_server.py (trong-process mock).
+    Sprint 3 Bonus: Gọi qua HTTP server (mcp_host.py).
+    Fallback về local `dispatch_tool` nếu HTTP server không phản hồi.
     """
     from datetime import datetime
+    import requests
 
     try:
-        # TODO Sprint 3: Thay bằng real MCP client nếu dùng HTTP server
-        from mcp_server import dispatch_tool
-        result = dispatch_tool(tool_name, tool_input)
+        url = f"http://localhost:8000/call/{tool_name}"
+        response = requests.post(url, json={"arguments": tool_input})
+        response.raise_for_status()
+
+        result_data = response.json()
+        if result_data.get("is_error"):
+            return {
+                "tool": tool_name,
+                "input": tool_input,
+                "output": None,
+                "error": {"code": "MCP_HTTP_API_ERROR", "reason": result_data.get("content")},
+                "timestamp": datetime.now().isoformat(),
+            }
+            
         return {
             "tool": tool_name,
             "input": tool_input,
-            "output": result,
+            "output": result_data.get("content"),
             "error": None,
             "timestamp": datetime.now().isoformat(),
         }
     except Exception as e:
-        return {
-            "tool": tool_name,
-            "input": tool_input,
-            "output": None,
-            "error": {"code": "MCP_CALL_FAILED", "reason": str(e)},
-            "timestamp": datetime.now().isoformat(),
-        }
+        print(f"  [Worker] MCP HTTP failed ({e}). Falling back to local mock...")
+        try:
+            from mcp_server import dispatch_tool
+            result = dispatch_tool(tool_name, tool_input)
+            return {
+                "tool": tool_name,
+                "input": tool_input,
+                "output": result,
+                "error": None,
+                "timestamp": datetime.now().isoformat(),
+            }
+        except Exception as local_e:
+            return {
+                "tool": tool_name,
+                "input": tool_input,
+                "output": None,
+                "error": {"code": "MCP_CALL_FAILED", "reason": str(local_e)},
+                "timestamp": datetime.now().isoformat(),
+            }
 
 
 # ─────────────────────────────────────────────

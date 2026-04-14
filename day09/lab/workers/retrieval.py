@@ -17,6 +17,8 @@ Gọi độc lập để test:
 
 import os
 import sys
+from dotenv import load_dotenv
+load_dotenv()
 
 # ─────────────────────────────────────────────
 # Worker Contract (xem contracts/worker_contracts.yaml)
@@ -28,38 +30,54 @@ WORKER_NAME = "retrieval_worker"
 DEFAULT_TOP_K = 3
 
 
+# Singleton instance cache for embedding function
+_CACHED_EMBED_FN = None
+
 def _get_embedding_fn():
     """
-    Trả về embedding function. Dùng OpenAI làm ưu tiên số 1 vì DB đã dùng OpenAI.
+    Trả về embedding function (Singleton). 
+    Dùng OpenAI làm ưu tiên số 1 vì DB đã dùng OpenAI.
     """
+    global _CACHED_EMBED_FN
+    if _CACHED_EMBED_FN is not None:
+        return _CACHED_EMBED_FN
+
+    api_key = os.getenv("OPENAI_API_KEY")
+    
     # Option 1: OpenAI (Ưu tiên)
-    try:
-        from openai import OpenAI
-        api_key = os.getenv("OPENAI_API_KEY")
-        if api_key:
+    if api_key:
+        try:
+            from openai import OpenAI
             client = OpenAI(api_key=api_key)
+            print("🚀 [Retrieval] Using OpenAI Embeddings (text-embedding-3-small)")
             def embed(text: str) -> list:
                 resp = client.embeddings.create(input=text, model="text-embedding-3-small")
                 return resp.data[0].embedding
-            return embed
-    except ImportError:
-        pass
+            _CACHED_EMBED_FN = embed
+            return _CACHED_EMBED_FN
+        except Exception as e:
+            print(f"⚠️ [Retrieval] Failed to init OpenAI: {e}")
 
     # Option 2: Sentence Transformers (offline)
     try:
         from sentence_transformers import SentenceTransformer
+        print("📥 [Retrieval] Loading Local Embeddings (all-MiniLM-L6-v2)...")
         model = SentenceTransformer("all-MiniLM-L6-v2")
         def embed(text: str) -> list:
             return model.encode([text])[0].tolist()
-        return embed
+        _CACHED_EMBED_FN = embed
+        return _CACHED_EMBED_FN
     except ImportError:
+        print("⚠️ [Retrieval] sentence_transformers not installed.")
         pass
 
     # Fallback: random embeddings
     import random
+    print("⚠️ [Retrieval] Falling back to RANDOM embeddings (1536 dim) - Search will be broken!")
     def embed(text: str) -> list:
         return [random.random() for _ in range(1536)]
-    return embed
+    _CACHED_EMBED_FN = embed
+    return _CACHED_EMBED_FN
 
 
 def _get_collection():

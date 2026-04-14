@@ -29,10 +29,10 @@ pyyaml>=6.0.1
 
 # ─── MCP (optional — Sprint 3 Bonus) ───
 # Uncomment nếu muốn implement real MCP server:
-# mcp>=1.0.0
-# httpx>=0.27.0
-# fastapi>=0.110.0
-# uvicorn>=0.27.0
+mcp>=1.0.0
+httpx>=0.27.0
+fastapi>=0.110.0
+uvicorn>=0.27.0
 
 # ─── Dev/Test ───────────────────────────
 pytest>=8.0.0
