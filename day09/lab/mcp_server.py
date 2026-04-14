@@ -1,5 +1,6 @@
 """
 mcp_server.py — Mock MCP Server
+Owner: Nam (MCP Owner)
 Sprint 3: Implement ít nhất 2 MCP tools.
 
 Mô phỏng MCP (Model Context Protocol) interface trong Python.
@@ -136,7 +137,6 @@ def tool_search_kb(query: str, top_k: int = 3) -> dict:
     """
     Tìm kiếm Knowledge Base bằng semantic search.
 
-    TODO Sprint 3: Kết nối với ChromaDB thực.
     Hiện tại: Delegate sang retrieval worker.
     """
     try:
@@ -332,9 +332,6 @@ def dispatch_tool(tool_name: str, tool_input: dict) -> dict:
 # ─────────────────────────────────────────────
 
 if __name__ == "__main__":
-    from dotenv import load_dotenv
-    load_dotenv()
-    
     print("=" * 60)
     print("MCP Server — Tool Discovery & Test")
     print("=" * 60)
