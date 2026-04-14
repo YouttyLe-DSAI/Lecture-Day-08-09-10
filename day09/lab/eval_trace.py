@@ -249,6 +249,11 @@ def compare_single_vs_multi(
     """
     So sánh Day 08 (single agent RAG) vs Day 09 (multi-agent).
 
+<<<<<<< HEAD
+=======
+    TODO Sprint 4: Điền kết quả thực tế từ Day 08 vào day08_baseline.
+
+>>>>>>> origin/main
     Returns:
         dict của comparison metrics
     """

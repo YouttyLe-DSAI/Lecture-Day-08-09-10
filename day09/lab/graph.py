@@ -13,10 +13,13 @@ import json
 import os
 from datetime import datetime
 from typing import TypedDict, Literal, Optional
+<<<<<<< HEAD
 from dotenv import load_dotenv
 
 # Load môi trường
 load_dotenv()
+=======
+>>>>>>> origin/main
 
 # Uncomment nếu dùng LangGraph:
 # from langgraph.graph import StateGraph, END
