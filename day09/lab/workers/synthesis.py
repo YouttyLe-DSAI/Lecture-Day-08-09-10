@@ -17,20 +17,8 @@ Gọi độc lập để test:
 """
 
 import os
-import re
-import sys
 
 WORKER_NAME = "synthesis_worker"
-
-if hasattr(sys.stdout, "reconfigure"):
-    sys.stdout.reconfigure(encoding="utf-8")
-
-try:
-    from dotenv import load_dotenv
-
-    load_dotenv()
-except Exception:
-    pass
 
 SYSTEM_PROMPT = """Bạn là trợ lý IT Helpdesk nội bộ.
 
@@ -46,14 +34,12 @@ Quy tắc nghiêm ngặt:
 def _call_llm(messages: list) -> str:
     """
     Gọi LLM để tổng hợp câu trả lời.
-    Nếu không có API key, trả signal để synthesize() dùng fallback grounded.
+    TODO Sprint 2: Implement với OpenAI hoặc Gemini.
     """
     # Option A: OpenAI
     try:
-        if not os.getenv("OPENAI_API_KEY"):
-            raise RuntimeError("OPENAI_API_KEY not set")
         from openai import OpenAI
-        client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"), timeout=10.0, max_retries=0)
+        client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
         response = client.chat.completions.create(
             model="gpt-4o-mini",
             messages=messages,
@@ -66,8 +52,6 @@ def _call_llm(messages: list) -> str:
 
     # Option B: Gemini
     try:
-        if not os.getenv("GOOGLE_API_KEY"):
-            raise RuntimeError("GOOGLE_API_KEY not set")
         import google.generativeai as genai
         genai.configure(api_key=os.getenv("GOOGLE_API_KEY"))
         model = genai.GenerativeModel("gemini-1.5-flash")
@@ -96,75 +80,12 @@ def _build_context(chunks: list, policy_result: dict) -> str:
     if policy_result and policy_result.get("exceptions_found"):
         parts.append("\n=== POLICY EXCEPTIONS ===")
         for ex in policy_result["exceptions_found"]:
-            source = ex.get("source", "policy_refund_v4.txt")
-            parts.append(f"- {ex.get('rule', '')} [{source}]")
-
-    if policy_result and policy_result.get("policy_version_note"):
-        parts.append("\n=== POLICY VERSION NOTE ===")
-        parts.append(policy_result["policy_version_note"])
-
-    if policy_result and policy_result.get("access_result"):
-        parts.append("\n=== ACCESS POLICY RESULT ===")
-        parts.append(policy_result["access_result"].get("rule", ""))
+            parts.append(f"- {ex.get('rule', '')}")
 
     if not parts:
         return "(Không có context)"
 
     return "\n\n".join(parts)
-
-
-def _collect_sources(chunks: list, policy_result: dict) -> list:
-    """Gom nguồn từ retrieved chunks và policy_result."""
-    sources = {c.get("source", "unknown") for c in chunks if c}
-
-    policy_sources = policy_result.get("source", []) if policy_result else []
-    if isinstance(policy_sources, str):
-        sources.add(policy_sources)
-    else:
-        sources.update(policy_sources)
-
-    for ex in policy_result.get("exceptions_found", []) if policy_result else []:
-        if ex.get("source"):
-            sources.add(ex["source"])
-
-    access = policy_result.get("access_result") if policy_result else None
-    if access and access.get("source"):
-        sources.add(access["source"])
-
-    return sorted(s for s in sources if s)
-
-
-def _fallback_from_context(chunks: list, policy_result: dict) -> str:
-    """
-    Fallback ngắn, chỉ dựa vào context có sẵn.
-    Dùng khi không gọi được LLM để worker vẫn grounded.
-    """
-    if policy_result and policy_result.get("policy_version_note"):
-        return (
-            "Không đủ thông tin trong tài liệu nội bộ để kết luận chắc chắn. "
-            f"{policy_result['policy_version_note']}"
-        )
-
-    if policy_result and policy_result.get("exceptions_found"):
-        rules = []
-        for ex in policy_result["exceptions_found"]:
-            source = ex.get("source", "policy_refund_v4.txt")
-            rules.append(f"{ex.get('rule', '')} [{source}]")
-        return "Ngoại lệ áp dụng: " + " ".join(rules)
-
-    if policy_result and policy_result.get("access_result"):
-        access = policy_result["access_result"]
-        source = access.get("source", "access_control_sop.txt")
-        return f"{access.get('rule', '')} [{source}]"
-
-    if chunks:
-        chunk = chunks[0]
-        source = chunk.get("source", "unknown")
-        text = re.sub(r"\s+", " ", chunk.get("text", "")).strip()
-        first_sentence = re.split(r"(?<=[.!?])\s+", text)[0]
-        return f"{first_sentence} [{source}]"
-
-    return "Không đủ thông tin trong tài liệu nội bộ."
 
 
 def _estimate_confidence(chunks: list, answer: str, policy_result: dict) -> float:
@@ -176,7 +97,7 @@ def _estimate_confidence(chunks: list, answer: str, policy_result: dict) -> floa
 
     TODO Sprint 2: Có thể dùng LLM-as-Judge để tính confidence chính xác hơn.
     """
-    if not chunks and not policy_result:
+    if not chunks:
         return 0.1  # Không có evidence → low confidence
 
     if "Không đủ thông tin" in answer or "không có trong tài liệu" in answer.lower():
@@ -186,7 +107,7 @@ def _estimate_confidence(chunks: list, answer: str, policy_result: dict) -> floa
     if chunks:
         avg_score = sum(c.get("score", 0) for c in chunks) / len(chunks)
     else:
-        avg_score = 0.75
+        avg_score = 0
 
     # Penalty nếu có exceptions (phức tạp hơn)
     exception_penalty = 0.05 * len(policy_result.get("exceptions_found", []))
@@ -218,10 +139,7 @@ Hãy trả lời câu hỏi dựa vào tài liệu trên."""
     ]
 
     answer = _call_llm(messages)
-    if answer.startswith("[SYNTHESIS ERROR]"):
-        answer = _fallback_from_context(chunks, policy_result)
-
-    sources = _collect_sources(chunks, policy_result)
+    sources = list({c.get("source", "unknown") for c in chunks})
     confidence = _estimate_confidence(chunks, answer, policy_result)
 
     return {
@@ -241,7 +159,6 @@ def run(state: dict) -> dict:
 
     state.setdefault("workers_called", [])
     state.setdefault("history", [])
-    state.setdefault("worker_io_logs", [])
     state["workers_called"].append(WORKER_NAME)
 
     worker_io = {
@@ -277,7 +194,7 @@ def run(state: dict) -> dict:
         state["confidence"] = 0.0
         state["history"].append(f"[{WORKER_NAME}] ERROR: {e}")
 
-    state["worker_io_logs"].append(worker_io)
+    state.setdefault("worker_io_logs", []).append(worker_io)
     return state
 
 
@@ -286,6 +203,9 @@ def run(state: dict) -> dict:
 # ─────────────────────────────────────────────
 
 if __name__ == "__main__":
+    from dotenv import load_dotenv
+    load_dotenv()
+
     print("=" * 50)
     print("Synthesis Worker — Standalone Test")
     print("=" * 50)
@@ -326,4 +246,4 @@ if __name__ == "__main__":
     print(f"\nAnswer:\n{result2['final_answer']}")
     print(f"Confidence: {result2['confidence']}")
 
-    print("\nOK: synthesis_worker test done.")
+    print("\n✅ synthesis_worker test done.")

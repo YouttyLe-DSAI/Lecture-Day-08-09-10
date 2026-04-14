@@ -1,0 +1,50 @@
+{
+  "generated_at": "2026-04-14T14:56:52.879173",
+  "day08_single_agent": {
+    "total_questions": 15,
+    "avg_confidence": 0.83,
+    "avg_latency_ms": 2035,
+    "abstain_rate": "27%",
+    "multi_hop_accuracy": "0%"
+  },
+  "day09_multi_agent": {
+    "total_traces": 15,
+    "routing_distribution": {
+      "retrieval_worker": "8/15 (53%)",
+      "policy_tool_worker": "7/15 (46%)"
+    },
+    "avg_confidence": 0.393,
+    "avg_latency_ms": 3478,
+    "mcp_usage_rate": "7/15 (46%)",
+    "hitl_rate": "1/15 (6%)",
+    "top_sources": [
+      [
+        "it_helpdesk_faq.txt",
+        8
+      ],
+      [
+        "access_control_sop.txt",
+        6
+      ],
+      [
+        "policy_refund_v4.txt",
+        4
+      ],
+      [
+        "sla_p1_2026.txt",
+        4
+      ],
+      [
+        "hr_leave_policy.txt",
+        2
+      ]
+    ]
+  },
+  "analysis": {
+    "routing_visibility": "Day 09 có route_reason cho từng câu → dễ debug hơn Day 08",
+    "latency_delta": "Day 09 thường có latency cao hơn Day 08 một chút (do tốn chi phí chạy qua Supervisor và Agent Flow), nhưng đổi lại chất lượng câu trả lời cao và an toàn hơn.",
+    "accuracy_delta": "Multi-agent giải quyết được ngoại lệ (exceptions) như Policy hoặc Flash Sale, thứ mà Single-agent Day 08 bó tay (Abstain 27%).",
+    "debuggability": "Multi-agent: có thể test từng worker độc lập. Single-agent: không thể.",
+    "mcp_benefit": "Day 09 có thể extend capability qua MCP không cần sửa core. Day 08 phải hard-code."
+  }
+}

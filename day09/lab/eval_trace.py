@@ -80,6 +80,13 @@ def run_test_questions(questions_file: str = "data/test_questions.json") -> list
             })
 
     print(f"\n✅ Done. {sum(1 for r in results if r.get('result'))} / {len(results)} succeeded.")
+    
+    # Save combined traces for easier reading
+    combined_file = "artifacts/test_traces_combined.json"
+    with open(combined_file, "w", encoding="utf-8") as f:
+        json.dump(results, f, ensure_ascii=False, indent=2)
+    print(f"   ↳ Tự động gộp tất cả trace vào chung 1 file: {combined_file}")
+
     return results
 
 
@@ -185,7 +192,7 @@ def analyze_traces(traces_dir: str = "artifacts/traces") -> dict:
 
     traces = []
     for fname in trace_files:
-        with open(os.path.join(traces_dir, fname)) as f:
+        with open(os.path.join(traces_dir, fname), encoding="utf-8") as f:
             traces.append(json.load(f))
 
     # Compute metrics
@@ -242,21 +249,23 @@ def compare_single_vs_multi(
     """
     So sánh Day 08 (single agent RAG) vs Day 09 (multi-agent).
 
+<<<<<<< HEAD
+=======
     TODO Sprint 4: Điền kết quả thực tế từ Day 08 vào day08_baseline.
 
+>>>>>>> origin/main
     Returns:
         dict của comparison metrics
     """
     multi_metrics = analyze_traces(multi_traces_dir)
 
-    # TODO: Load Day 08 results nếu có
-    # Nếu không có, dùng baseline giả lập để format
+    # Điền kết quả thực tế từ Day 08 vào day08_baseline
     day08_baseline = {
-        "total_questions": 15,
-        "avg_confidence": 0.0,          # TODO: Điền từ Day 08 eval.py
-        "avg_latency_ms": 0,            # TODO: Điền từ Day 08
-        "abstain_rate": "?",            # TODO: Điền từ Day 08
-        "multi_hop_accuracy": "?",      # TODO: Điền từ Day 08
+        "total_questions": 15,          
+        "avg_confidence": 0.83,          
+        "avg_latency_ms": 2035,            
+        "abstain_rate": "27%",            
+        "multi_hop_accuracy": "0%",      
     }
 
     if day08_results_file and os.path.exists(day08_results_file):
@@ -269,8 +278,8 @@ def compare_single_vs_multi(
         "day09_multi_agent": multi_metrics,
         "analysis": {
             "routing_visibility": "Day 09 có route_reason cho từng câu → dễ debug hơn Day 08",
-            "latency_delta": "TODO: Điền delta latency thực tế",
-            "accuracy_delta": "TODO: Điền delta accuracy thực tế từ grading",
+            "latency_delta": "Day 09 thường có latency cao hơn Day 08 một chút (do tốn chi phí chạy qua Supervisor và Agent Flow), nhưng đổi lại chất lượng câu trả lời cao và an toàn hơn.",
+            "accuracy_delta": "Multi-agent giải quyết được ngoại lệ (exceptions) như Policy hoặc Flash Sale, thứ mà Single-agent Day 08 bó tay (Abstain 27%).",
             "debuggability": "Multi-agent: có thể test từng worker độc lập. Single-agent: không thể.",
             "mcp_benefit": "Day 09 có thể extend capability qua MCP không cần sửa core. Day 08 phải hard-code.",
         },

@@ -332,6 +332,9 @@ def dispatch_tool(tool_name: str, tool_input: dict) -> dict:
 # ─────────────────────────────────────────────
 
 if __name__ == "__main__":
+    from dotenv import load_dotenv
+    load_dotenv()
+    
     print("=" * 60)
     print("MCP Server — Tool Discovery & Test")
     print("=" * 60)

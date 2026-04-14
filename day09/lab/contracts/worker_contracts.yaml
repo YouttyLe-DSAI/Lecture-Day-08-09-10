@@ -96,8 +96,8 @@ retrieval_worker:
     - "Score phải là float trong khoảng [0, 1]"
     - "Stateless: không đọc hoặc ghi state ngoài những gì được khai báo ở trên"
   actual_implementation:
-    status: "done"
-    notes: "ChromaDB retrieval against the rebuilt Day09 collection day09_docs using OpenAI text-embedding-3-small; filters weak chunks and exact-missing ERR-* codes so synthesis can abstain."
+    status: "done"  # Update to "done" khi xong
+    notes: ""
 
 # ─────────────────────────────────────────────
 # Policy Tool Worker
@@ -167,7 +167,7 @@ policy_tool_worker:
     - "Không được tự bịa policy rules không có trong tài liệu"
   actual_implementation:
     status: "done"
-    notes: "Rule-based policy analysis for refund/access cases; detects Flash Sale, digital product, activated product, temporal scoping, and calls MCP search/check_access_permission/get_ticket_info when needed."
+    notes: ""
 
 # ─────────────────────────────────────────────
 # Synthesis Worker
@@ -215,7 +215,7 @@ synthesis_worker:
     - "Không được dùng kiến thức ngoài context được cung cấp"
   actual_implementation:
     status: "done"
-    notes: "Grounded synthesis with LLM support when API keys exist and compact context-only fallback with citations/abstain behavior when no LLM is available."
+    notes: ""
 
 # ─────────────────────────────────────────────
 # MCP Server
@@ -270,5 +270,5 @@ mcp_server:
     - "list_tools() phải trả về đúng format MCP tool schema"
     - "Không được raise exception ra ngoài dispatch_tool()"
   actual_implementation:
-    status: "TODO Sprint 3"
+    status: "done"
     notes: ""
