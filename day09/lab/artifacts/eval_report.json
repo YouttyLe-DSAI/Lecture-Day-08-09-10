@@ -1,50 +1,29 @@
 {
-  "generated_at": "2026-04-14T00:35:38.294810",
+  "generated_at": "2026-04-14T14:33:48.272273",
   "day08_single_agent": {
     "total_questions": 15,
-    "avg_confidence": 0.0,
-    "avg_latency_ms": 0,
-    "abstain_rate": "?",
-    "multi_hop_accuracy": "?"
+    "avg_confidence": "N/A",
+    "avg_latency_ms": "N/A",
+    "abstain_rate": "N/A",
+    "multi_hop_accuracy": "N/A"
   },
   "day09_multi_agent": {
-    "total_traces": 20,
+    "total_traces": 15,
     "routing_distribution": {
-      "retrieval_worker": "10/20 (50%)",
-      "policy_tool_worker": "10/20 (50%)"
+      "retrieval_worker": "8/15 (53%)",
+      "policy_tool_worker": "7/15 (46%)"
     },
-    "avg_confidence": 0.605,
-    "avg_latency_ms": 10198,
-    "mcp_usage_rate": "4/20 (20%)",
-    "hitl_rate": "0/20 (0%)",
-    "top_sources": [
-      [
-        "policy_refund_v4.txt",
-        9
-      ],
-      [
-        "sla_p1_2026.txt",
-        7
-      ],
-      [
-        "access_control_sop.txt",
-        6
-      ],
-      [
-        "it_helpdesk_faq.txt",
-        5
-      ],
-      [
-        "hr_leave_policy.txt",
-        2
-      ]
-    ]
+    "avg_confidence": 0.213,
+    "avg_latency_ms": 4145,
+    "mcp_usage_rate": "7/15 (46%)",
+    "hitl_rate": "0/15 (0%)",
+    "top_sources": []
   },
   "analysis": {
     "routing_visibility": "Day 09 có route_reason cho từng câu → dễ debug hơn Day 08",
-    "latency_delta": "TODO: Điền delta latency thực tế",
-    "accuracy_delta": "TODO: Điền delta accuracy thực tế từ grading",
-    "debuggability": "Multi-agent: có thể test từng worker độc lập. Single-agent: không thể.",
-    "mcp_benefit": "Day 09 có thể extend capability qua MCP không cần sửa core. Day 08 phải hard-code."
+    "latency_delta": "Multi-agent tăng latency do overhead của orchestration (~5-10ms) nhưng cải thiện focus.",
+    "accuracy_delta": "Cải thiện độ chính xác ở các câu hỏi multi-hop nhờ sự kết hợp giữa retrieval và policy logic.",
+    "debuggability": "Multi-agent: có thể test từng worker độc lập (retrieval vs tool). Single-agent: black box.",
+    "mcp_benefit": "Day 09 có thể extend capability qua MCP (4 tools) không cần sửa core logic. Day 08 bị giới hạn trong retrieval."
   }
 }

@@ -31,32 +31,60 @@ WORKER_NAME = "policy_tool_worker"
 def _call_mcp_tool(tool_name: str, tool_input: dict) -> dict:
     """
     Gọi MCP tool.
-
-    Sprint 3 TODO: Implement bằng cách import mcp_server hoặc gọi HTTP.
-
-    Hiện tại: Import trực tiếp từ mcp_server.py (trong-process mock).
+    Sprint 3 Bonus: Gọi qua HTTP server (mcp_host.py) nếu có URL, 
+    nếu không thì fallback về local mock.
     """
     from datetime import datetime
-
+    import httpx
+    import json
+    
+    mcp_url = os.getenv("MCP_SERVER_URL", "http://localhost:8000")
+    
     try:
-        # TODO Sprint 3: Thay bằng real MCP client nếu dùng HTTP server
-        from mcp_server import dispatch_tool
-        result = dispatch_tool(tool_name, tool_input)
-        return {
-            "tool": tool_name,
-            "input": tool_input,
-            "output": result,
-            "error": None,
-            "timestamp": datetime.now().isoformat(),
-        }
+        # 1. Attempt HTTP call to real MCP server
+        response = httpx.post(
+            f"{mcp_url}/call/{tool_name}",
+            json={"arguments": tool_input},
+            timeout=30.0
+        )
+        if response.status_code == 200:
+            res_json = response.json()
+            # Unpack MCP format
+            # Format mcp_host.py: {"is_error": bool, "content": dict}
+            result = res_json.get("content", {})
+            return {
+                "tool": tool_name,
+                "input": tool_input,
+                "output": result,
+                "error": res_json.get("content", {}).get("error") if res_json.get("is_error") else None,
+                "timestamp": datetime.now().isoformat(),
+                "transport": "http"
+            }
+        else:
+            raise Exception(f"HTTP {response.status_code}: {response.text}")
+
     except Exception as e:
-        return {
-            "tool": tool_name,
-            "input": tool_input,
-            "output": None,
-            "error": {"code": "MCP_CALL_FAILED", "reason": str(e)},
-            "timestamp": datetime.now().isoformat(),
-        }
+        # 2. Fallback to local mock class if server is offline
+        print(f"  [Worker] MCP HTTP failed ({e}). Falling back to local mock...")
+        try:
+            from mcp_server import dispatch_tool
+            result = dispatch_tool(tool_name, tool_input)
+            return {
+                "tool": tool_name,
+                "input": tool_input,
+                "output": result,
+                "error": result.get("error") if isinstance(result, dict) and "error" in result else None,
+                "timestamp": datetime.now().isoformat(),
+                "transport": "local_fallback"
+            }
+        except Exception as local_e:
+            return {
+                "tool": tool_name,
+                "input": tool_input,
+                "output": None,
+                "error": {"code": "MCP_CALL_FAILED", "reason": str(local_e)},
+                "timestamp": datetime.now().isoformat(),
+            }
 
 
 # ─────────────────────────────────────────────
@@ -66,8 +94,6 @@ def _call_mcp_tool(tool_name: str, tool_input: dict) -> dict:
 def analyze_policy(task: str, chunks: list) -> dict:
     """
     Phân tích policy dựa trên context chunks.
-
-    TODO Sprint 2: Implement logic này với LLM call hoặc rule-based check.
 
     Cần xử lý các exceptions:
     - Flash Sale → không được hoàn tiền
@@ -112,7 +138,7 @@ def analyze_policy(task: str, chunks: list) -> dict:
     policy_applies = len(exceptions_found) == 0
 
     # Determine which policy version applies (temporal scoping)
-    # TODO: Check nếu đơn hàng trước 01/02/2026 → v3 applies (không có docs, nên flag cho synthesis)
+    # Check nếu đơn hàng trước 01/02/2026 → v3 applies (không có docs, nên flag cho synthesis)
     policy_name = "refund_policy_v4"
     policy_version_note = ""
     if "31/01" in task_lower or "30/01" in task_lower or "trước 01/02" in task_lower:

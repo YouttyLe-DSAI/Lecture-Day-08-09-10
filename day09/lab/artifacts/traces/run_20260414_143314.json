@@ -1,6 +1,6 @@
 {
-  "task": "SLA xử lý ticket P1 là bao lâu?",
-  "route_reason": "task contains SLA/ticket keywords: ['p1', 'sla', 'ticket']",
+  "task": "ERR-403-AUTH là lỗi gì và cách xử lý?",
+  "route_reason": "no specific domain keyword matched → default retrieval",
   "risk_high": false,
   "needs_tool": false,
   "hitl_triggered": false,
@@ -12,24 +12,24 @@
   "sources": [],
   "confidence": 0.1,
   "history": [
-    "[supervisor] received task: SLA xử lý ticket P1 là bao lâu?",
-    "[supervisor] route=retrieval_worker reason=task contains SLA/ticket keywords: ['p1', 'sla', 'ticket']",
+    "[supervisor] received task: ERR-403-AUTH là lỗi gì và cách xử lý?",
+    "[supervisor] route=retrieval_worker reason=no specific domain keyword matched → default retrieval",
     "[retrieval_worker] retrieved 0 chunks from []",
     "[synthesis_worker] answer generated, confidence=0.1, sources=[]",
-    "[graph] completed in 6155ms"
+    "[graph] completed in 2154ms"
   ],
   "workers_called": [
     "retrieval_worker",
     "synthesis_worker"
   ],
   "supervisor_route": "retrieval_worker",
-  "latency_ms": 6155,
-  "run_id": "run_20260414_005621",
+  "latency_ms": 2154,
+  "run_id": "run_20260414_143314",
   "worker_io_logs": [
     {
       "worker": "retrieval_worker",
       "input": {
-        "task": "SLA xử lý ticket P1 là bao lâu?",
+        "task": "ERR-403-AUTH là lỗi gì và cách xử lý?",
         "top_k": 3
       },
       "output": {
@@ -41,7 +41,7 @@
     {
       "worker": "synthesis_worker",
       "input": {
-        "task": "SLA xử lý ticket P1 là bao lâu?",
+        "task": "ERR-403-AUTH là lỗi gì và cách xử lý?",
         "chunks_count": 0,
         "has_policy": false
       },
@@ -52,5 +52,6 @@
       },
       "error": null
     }
-  ]
+  ],
+  "question_id": "q09"
 }

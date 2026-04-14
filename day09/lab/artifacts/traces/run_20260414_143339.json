@@ -1,16 +1,24 @@
 {
-  "task": "Ticket P1 lúc 2am. Cần cấp Level 2 access tạm thời cho contractor. Nêu đủ cả hai quy trình.",
-  "route_reason": "multi-hop: task contains BOTH SLA and access control keywords → policy_tool_worker (will also retrieve) | risk_high flagged due to: ['2am', 'tạm thời', 'contractor']",
+  "task": "Ticket P1 lúc 2am. Cần cấp Level 2 access tạm thời cho contractor để thực hiện emergency fix. Đồng thời cần notify stakeholders theo SLA. Nêu đủ cả hai quy trình.",
+  "route_reason": "multi-hop: task contains BOTH SLA and access control keywords → policy_tool_worker (will also retrieve) | risk_high flagged due to: ['emergency', '2am', 'tạm thời', 'contractor']",
   "risk_high": true,
   "needs_tool": true,
   "hitl_triggered": false,
-  "retrieved_chunks": [],
+  "retrieved_chunks": [
+    {
+      "text": "[MOCK] Không thể query ChromaDB: The api_key client option must be set either by passing api_key to the client or by setting the OPENAI_API_KEY environment variable. Kết quả giả lập.",
+      "source": "mock_data",
+      "score": 0.5
+    }
+  ],
   "retrieved_sources": [],
   "policy_result": {
     "policy_applies": true,
     "policy_name": "refund_policy_v4",
     "exceptions_found": [],
-    "source": [],
+    "source": [
+      "mock_data"
+    ],
     "policy_version_note": "",
     "explanation": "Analyzed via rule-based policy check. TODO: upgrade to LLM-based analysis.",
     "access_check": {
@@ -32,16 +40,25 @@
     {
       "tool": "search_kb",
       "input": {
-        "query": "Ticket P1 lúc 2am. Cần cấp Level 2 access tạm thời cho contractor. Nêu đủ cả hai quy trình.",
+        "query": "Ticket P1 lúc 2am. Cần cấp Level 2 access tạm thời cho contractor để thực hiện emergency fix. Đồng thời cần notify stakeholders theo SLA. Nêu đủ cả hai quy trình.",
         "top_k": 3
       },
       "output": {
-        "chunks": [],
-        "sources": [],
-        "total_found": 0
+        "chunks": [
+          {
+            "text": "[MOCK] Không thể query ChromaDB: The api_key client option must be set either by passing api_key to the client or by setting the OPENAI_API_KEY environment variable. Kết quả giả lập.",
+            "source": "mock_data",
+            "score": 0.5
+          }
+        ],
+        "sources": [
+          "mock_data"
+        ],
+        "total_found": 1
       },
       "error": null,
-      "timestamp": "2026-04-14T00:56:32.351059"
+      "timestamp": "2026-04-14T14:33:42.444486",
+      "transport": "http"
     },
     {
       "tool": "get_ticket_info",
@@ -65,7 +82,8 @@
         ]
       },
       "error": null,
-      "timestamp": "2026-04-14T00:56:32.351059"
+      "timestamp": "2026-04-14T14:33:44.766972",
+      "transport": "http"
     },
     {
       "tool": "check_access_permission",
@@ -89,22 +107,25 @@
         "source": "access_control_sop.txt"
       },
       "error": null,
-      "timestamp": "2026-04-14T00:56:32.351059"
+      "timestamp": "2026-04-14T14:33:47.102781",
+      "transport": "http"
     }
   ],
   "final_answer": "Không đủ thông tin trong tài liệu nội bộ.",
-  "sources": [],
-  "confidence": 0.1,
+  "sources": [
+    "mock_data"
+  ],
+  "confidence": 0.3,
   "history": [
-    "[supervisor] received task: Ticket P1 lúc 2am. Cần cấp Level 2 access tạm thời cho contractor. Nêu đủ cả hai",
-    "[supervisor] route=policy_tool_worker reason=multi-hop: task contains BOTH SLA and access control keywords → policy_tool_worker (will also retrieve) | risk_high flagged due to: ['2am', 'tạm thời', 'contractor']",
+    "[supervisor] received task: Ticket P1 lúc 2am. Cần cấp Level 2 access tạm thời cho contractor để thực hiện e",
+    "[supervisor] route=policy_tool_worker reason=multi-hop: task contains BOTH SLA and access control keywords → policy_tool_worker (will also retrieve) | risk_high flagged due to: ['emergency', '2am', 'tạm thời', 'contractor']",
     "[retrieval_worker] retrieved 0 chunks from []",
     "[policy_tool_worker] called MCP search_kb",
     "[policy_tool_worker] called MCP get_ticket_info",
     "[policy_tool_worker] called MCP check_access_permission(level=2)",
     "[policy_tool_worker] policy_applies=True, exceptions=0",
-    "[synthesis_worker] answer generated, confidence=0.1, sources=[]",
-    "[graph] completed in 2295ms"
+    "[synthesis_worker] answer generated, confidence=0.3, sources=['mock_data']",
+    "[graph] completed in 8839ms"
   ],
   "workers_called": [
     "retrieval_worker",
@@ -112,13 +133,13 @@
     "synthesis_worker"
   ],
   "supervisor_route": "policy_tool_worker",
-  "latency_ms": 2295,
-  "run_id": "run_20260414_005631",
+  "latency_ms": 8839,
+  "run_id": "run_20260414_143339",
   "worker_io_logs": [
     {
       "worker": "retrieval_worker",
       "input": {
-        "task": "Ticket P1 lúc 2am. Cần cấp Level 2 access tạm thời cho contractor. Nêu đủ cả hai quy trình.",
+        "task": "Ticket P1 lúc 2am. Cần cấp Level 2 access tạm thời cho contractor để thực hiện emergency fix. Đồng thời cần notify stakeholders theo SLA. Nêu đủ cả hai quy trình.",
         "top_k": 3
       },
       "output": {
@@ -130,7 +151,7 @@
     {
       "worker": "policy_tool_worker",
       "input": {
-        "task": "Ticket P1 lúc 2am. Cần cấp Level 2 access tạm thời cho contractor. Nêu đủ cả hai quy trình.",
+        "task": "Ticket P1 lúc 2am. Cần cấp Level 2 access tạm thời cho contractor để thực hiện emergency fix. Đồng thời cần notify stakeholders theo SLA. Nêu đủ cả hai quy trình.",
         "chunks_count": 0,
         "needs_tool": true
       },
@@ -144,16 +165,19 @@
     {
       "worker": "synthesis_worker",
       "input": {
-        "task": "Ticket P1 lúc 2am. Cần cấp Level 2 access tạm thời cho contractor. Nêu đủ cả hai quy trình.",
-        "chunks_count": 0,
+        "task": "Ticket P1 lúc 2am. Cần cấp Level 2 access tạm thời cho contractor để thực hiện emergency fix. Đồng thời cần notify stakeholders theo SLA. Nêu đủ cả hai quy trình.",
+        "chunks_count": 1,
         "has_policy": true
       },
       "output": {
         "answer_length": 41,
-        "sources": [],
-        "confidence": 0.1
+        "sources": [
+          "mock_data"
+        ],
+        "confidence": 0.3
       },
       "error": null
     }
-  ]
+  ],
+  "question_id": "q15"
 }

@@ -1,0 +1,123 @@
+{
+  "task": "Sản phẩm kỹ thuật số (license key) có được hoàn tiền không?",
+  "route_reason": "task contains policy/refund keywords: ['hoàn tiền']",
+  "risk_high": false,
+  "needs_tool": true,
+  "hitl_triggered": false,
+  "retrieved_chunks": [
+    {
+      "text": "[MOCK] Không thể query ChromaDB: The api_key client option must be set either by passing api_key to the client or by setting the OPENAI_API_KEY environment variable. Kết quả giả lập.",
+      "source": "mock_data",
+      "score": 0.5
+    }
+  ],
+  "retrieved_sources": [],
+  "policy_result": {
+    "policy_applies": false,
+    "policy_name": "refund_policy_v4",
+    "exceptions_found": [
+      {
+        "type": "digital_product_exception",
+        "rule": "Sản phẩm kỹ thuật số (license key, subscription) không được hoàn tiền (Điều 3).",
+        "source": "policy_refund_v4.txt"
+      }
+    ],
+    "source": [
+      "mock_data"
+    ],
+    "policy_version_note": "",
+    "explanation": "Analyzed via rule-based policy check. TODO: upgrade to LLM-based analysis."
+  },
+  "mcp_tools_used": [
+    {
+      "tool": "search_kb",
+      "input": {
+        "query": "Sản phẩm kỹ thuật số (license key) có được hoàn tiền không?",
+        "top_k": 3
+      },
+      "output": {
+        "chunks": [
+          {
+            "text": "[MOCK] Không thể query ChromaDB: The api_key client option must be set either by passing api_key to the client or by setting the OPENAI_API_KEY environment variable. Kết quả giả lập.",
+            "source": "mock_data",
+            "score": 0.5
+          }
+        ],
+        "sources": [
+          "mock_data"
+        ],
+        "total_found": 1
+      },
+      "error": null,
+      "timestamp": "2026-04-14T14:33:11.466846",
+      "transport": "http"
+    }
+  ],
+  "final_answer": "Sản phẩm kỹ thuật số (license key) không được hoàn tiền theo chính sách. [Điều 3]",
+  "sources": [
+    "mock_data"
+  ],
+  "confidence": 0.45,
+  "history": [
+    "[supervisor] received task: Sản phẩm kỹ thuật số (license key) có được hoàn tiền không?",
+    "[supervisor] route=policy_tool_worker reason=task contains policy/refund keywords: ['hoàn tiền']",
+    "[retrieval_worker] retrieved 0 chunks from []",
+    "[policy_tool_worker] called MCP search_kb",
+    "[policy_tool_worker] policy_applies=False, exceptions=1",
+    "[synthesis_worker] answer generated, confidence=0.45, sources=['mock_data']",
+    "[graph] completed in 4456ms"
+  ],
+  "workers_called": [
+    "retrieval_worker",
+    "policy_tool_worker",
+    "synthesis_worker"
+  ],
+  "supervisor_route": "policy_tool_worker",
+  "latency_ms": 4456,
+  "run_id": "run_20260414_143308",
+  "worker_io_logs": [
+    {
+      "worker": "retrieval_worker",
+      "input": {
+        "task": "Sản phẩm kỹ thuật số (license key) có được hoàn tiền không?",
+        "top_k": 3
+      },
+      "output": {
+        "chunks_count": 0,
+        "sources": []
+      },
+      "error": null
+    },
+    {
+      "worker": "policy_tool_worker",
+      "input": {
+        "task": "Sản phẩm kỹ thuật số (license key) có được hoàn tiền không?",
+        "chunks_count": 0,
+        "needs_tool": true
+      },
+      "output": {
+        "policy_applies": false,
+        "exceptions_count": 1,
+        "mcp_calls": 1
+      },
+      "error": null
+    },
+    {
+      "worker": "synthesis_worker",
+      "input": {
+        "task": "Sản phẩm kỹ thuật số (license key) có được hoàn tiền không?",
+        "chunks_count": 1,
+        "has_policy": true
+      },
+      "output": {
+        "answer_length": 81,
+        "sources": [
+          "mock_data"
+        ],
+        "confidence": 0.45
+      },
+      "error": null
+    }
+  ],
+  "question_id": "q07"
+}

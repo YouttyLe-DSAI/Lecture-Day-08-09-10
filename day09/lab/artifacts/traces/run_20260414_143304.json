@@ -1,6 +1,6 @@
 {
-  "task": "SLA xử lý ticket P1 là bao lâu?",
-  "route_reason": "task contains SLA/ticket keywords: ['p1', 'sla', 'ticket']",
+  "task": "Nhân viên được làm remote tối đa mấy ngày mỗi tuần?",
+  "route_reason": "task contains HR policy keywords: ['remote']",
   "risk_high": false,
   "needs_tool": false,
   "hitl_triggered": false,
@@ -12,24 +12,24 @@
   "sources": [],
   "confidence": 0.1,
   "history": [
-    "[supervisor] received task: SLA xử lý ticket P1 là bao lâu?",
-    "[supervisor] route=retrieval_worker reason=task contains SLA/ticket keywords: ['p1', 'sla', 'ticket']",
+    "[supervisor] received task: Nhân viên được làm remote tối đa mấy ngày mỗi tuần?",
+    "[supervisor] route=retrieval_worker reason=task contains HR policy keywords: ['remote']",
     "[retrieval_worker] retrieved 0 chunks from []",
     "[synthesis_worker] answer generated, confidence=0.1, sources=[]",
-    "[graph] completed in 8594ms"
+    "[graph] completed in 1768ms"
   ],
   "workers_called": [
     "retrieval_worker",
     "synthesis_worker"
   ],
   "supervisor_route": "retrieval_worker",
-  "latency_ms": 8594,
-  "run_id": "run_20260414_005149",
+  "latency_ms": 1768,
+  "run_id": "run_20260414_143304",
   "worker_io_logs": [
     {
       "worker": "retrieval_worker",
       "input": {
-        "task": "SLA xử lý ticket P1 là bao lâu?",
+        "task": "Nhân viên được làm remote tối đa mấy ngày mỗi tuần?",
         "top_k": 3
       },
       "output": {
@@ -41,7 +41,7 @@
     {
       "worker": "synthesis_worker",
       "input": {
-        "task": "SLA xử lý ticket P1 là bao lâu?",
+        "task": "Nhân viên được làm remote tối đa mấy ngày mỗi tuần?",
         "chunks_count": 0,
         "has_policy": false
       },
@@ -52,5 +52,6 @@
       },
       "error": null
     }
-  ]
+  ],
+  "question_id": "q05"
 }

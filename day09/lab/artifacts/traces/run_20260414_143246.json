@@ -8,23 +8,23 @@
   "retrieved_sources": [],
   "policy_result": {},
   "mcp_tools_used": [],
-  "final_answer": "Không đủ thông tin trong tài liệu nội bộ để trả lời câu hỏi này.",
+  "final_answer": "Không đủ thông tin trong tài liệu nội bộ.",
   "sources": [],
   "confidence": 0.1,
   "history": [
     "[supervisor] received task: SLA xử lý ticket P1 là bao lâu?",
     "[supervisor] route=retrieval_worker reason=task contains SLA/ticket keywords: ['p1', 'sla', 'ticket']",
-    "[retrieval_worker] ERROR: Error code: 401 - {'error': {'message': 'Incorrect API key provided: ssk-proj*********************************************************************************************************************************************************s2cA. You can find your API key at https://platform.openai.com/account/api-keys.', 'type': 'invalid_request_error', 'param': None, 'code': 'invalid_api_key'}}",
+    "[retrieval_worker] retrieved 0 chunks from []",
     "[synthesis_worker] answer generated, confidence=0.1, sources=[]",
-    "[graph] completed in 4954ms"
+    "[graph] completed in 6206ms"
   ],
   "workers_called": [
     "retrieval_worker",
     "synthesis_worker"
   ],
   "supervisor_route": "retrieval_worker",
-  "latency_ms": 4954,
-  "run_id": "run_20260414_005115",
+  "latency_ms": 6206,
+  "run_id": "run_20260414_143246",
   "worker_io_logs": [
     {
       "worker": "retrieval_worker",
@@ -32,11 +32,11 @@
         "task": "SLA xử lý ticket P1 là bao lâu?",
         "top_k": 3
       },
-      "output": null,
-      "error": {
-        "code": "RETRIEVAL_FAILED",
-        "reason": "Error code: 401 - {'error': {'message': 'Incorrect API key provided: ssk-proj*********************************************************************************************************************************************************s2cA. You can find your API key at https://platform.openai.com/account/api-keys.', 'type': 'invalid_request_error', 'param': None, 'code': 'invalid_api_key'}}"
-      }
+      "output": {
+        "chunks_count": 0,
+        "sources": []
+      },
+      "error": null
     },
     {
       "worker": "synthesis_worker",
@@ -46,11 +46,12 @@
         "has_policy": false
       },
       "output": {
-        "answer_length": 64,
+        "answer_length": 41,
         "sources": [],
         "confidence": 0.1
       },
       "error": null
     }
-  ]
+  ],
+  "question_id": "q01"
 }

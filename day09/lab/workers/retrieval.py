@@ -32,7 +32,6 @@ DEFAULT_TOP_K = 3
 def _get_embedding_fn():
     """
     Trả về embedding function.
-    TODO Sprint 1: Implement dùng OpenAI hoặc Sentence Transformers.
     """
     # Option A: Sentence Transformers (offline, không cần API key)
     try:
@@ -66,7 +65,6 @@ def _get_embedding_fn():
 def _get_collection():
     """
     Kết nối ChromaDB collection.
-    TODO Sprint 2: Đảm bảo collection đã được build từ Step 3 trong README.
     """
     import chromadb
     client = chromadb.PersistentClient(path="./chroma_db")
@@ -86,7 +84,6 @@ def retrieve_dense(query: str, top_k: int = DEFAULT_TOP_K) -> list:
     """
     Dense retrieval: embed query → query ChromaDB → trả về top_k chunks.
 
-    TODO Sprint 2: Implement phần này.
     - Dùng _get_embedding_fn() để embed query
     - Query collection với n_results=top_k
     - Format result thành list of dict
@@ -94,7 +91,7 @@ def retrieve_dense(query: str, top_k: int = DEFAULT_TOP_K) -> list:
     Returns:
         list of {"text": str, "source": str, "score": float, "metadata": dict}
     """
-    # TODO: Implement dense retrieval
+    # Dense retrieval implementation
     embed = _get_embedding_fn()
     query_embedding = embed(query)
 

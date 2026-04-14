@@ -156,7 +156,7 @@ def _estimate_confidence(chunks: list, answer: str, policy_result: dict) -> floa
     - Có exceptions không
     - Answer có abstain không
 
-    TODO Sprint 2: Có thể dùng LLM-as-Judge để tính confidence chính xác hơn.
+    Note: Current version uses heuristic scoring. LLM-as-Judge is an optional enhancement.
     """
     if not chunks:
         return 0.1  # Không có evidence → low confidence

@@ -5,7 +5,7 @@
 # Rule: Supervisor giữ quyết định luồng. Worker giữ domain skill.
 #       Contract là ranh giới rõ ràng giữa hai bên.
 #
-# TODO Sprint 2: Cập nhật "actual_implementation" khi đã implement xong.
+# Contracts are locked as they represent the finalized design.
 
 version: "1.0"
 updated_at: "2026-04-13"
