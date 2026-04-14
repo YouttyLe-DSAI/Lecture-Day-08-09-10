@@ -1,0 +1,179 @@
+{
+  "task": "Ticket P1 lúc 2am. Cần cấp Level 2 access tạm thời cho contractor. Nêu đủ cả hai quy trình.",
+  "route_reason": "multi-hop: task contains BOTH SLA and access control keywords → policy_tool_worker (will also retrieve) | risk_high flagged due to: ['2am', 'tạm thời', 'contractor']",
+  "risk_high": true,
+  "needs_tool": true,
+  "hitl_triggered": false,
+  "retrieved_chunks": [
+    {
+      "text": "[MOCK] Không thể query ChromaDB: Error code: 401 - {'error': {'message': 'Incorrect API key provided: ssk-proj*********************************************************************************************************************************************************s2cA. You can find your API key at https://platform.openai.com/account/api-keys.', 'type': 'invalid_request_error', 'param': None, 'code': 'invalid_api_key'}}. Kết quả giả lập.",
+      "source": "mock_data",
+      "score": 0.5
+    }
+  ],
+  "retrieved_sources": [],
+  "policy_result": {
+    "policy_applies": true,
+    "policy_name": "refund_policy_v4",
+    "exceptions_found": [],
+    "source": [
+      "mock_data"
+    ],
+    "policy_version_note": "",
+    "explanation": "Analyzed via rule-based policy check. TODO: upgrade to LLM-based analysis.",
+    "access_check": {
+      "access_level": 2,
+      "can_grant": true,
+      "required_approvers": [
+        "Line Manager",
+        "IT Admin"
+      ],
+      "approver_count": 2,
+      "emergency_override": true,
+      "notes": [
+        "Level 2 có thể cấp tạm thời với approval đồng thời của Line Manager và IT Admin on-call."
+      ],
+      "source": "access_control_sop.txt"
+    }
+  },
+  "mcp_tools_used": [
+    {
+      "tool": "search_kb",
+      "input": {
+        "query": "Ticket P1 lúc 2am. Cần cấp Level 2 access tạm thời cho contractor. Nêu đủ cả hai quy trình.",
+        "top_k": 3
+      },
+      "output": {
+        "chunks": [
+          {
+            "text": "[MOCK] Không thể query ChromaDB: Error code: 401 - {'error': {'message': 'Incorrect API key provided: ssk-proj*********************************************************************************************************************************************************s2cA. You can find your API key at https://platform.openai.com/account/api-keys.', 'type': 'invalid_request_error', 'param': None, 'code': 'invalid_api_key'}}. Kết quả giả lập.",
+            "source": "mock_data",
+            "score": 0.5
+          }
+        ],
+        "sources": [
+          "mock_data"
+        ],
+        "total_found": 1
+      },
+      "error": null,
+      "timestamp": "2026-04-14T00:51:23.266838"
+    },
+    {
+      "tool": "get_ticket_info",
+      "input": {
+        "ticket_id": "P1-LATEST"
+      },
+      "output": {
+        "ticket_id": "IT-9847",
+        "priority": "P1",
+        "title": "API Gateway down — toàn bộ người dùng không đăng nhập được",
+        "status": "in_progress",
+        "assignee": "nguyen.van.a@company.internal",
+        "created_at": "2026-04-13T22:47:00",
+        "sla_deadline": "2026-04-14T02:47:00",
+        "escalated": true,
+        "escalated_to": "senior_engineer_team",
+        "notifications_sent": [
+          "slack:#incident-p1",
+          "email:incident@company.internal",
+          "pagerduty:oncall"
+        ]
+      },
+      "error": null,
+      "timestamp": "2026-04-14T00:51:23.266838"
+    },
+    {
+      "tool": "check_access_permission",
+      "input": {
+        "access_level": 2,
+        "requester_role": "contractor",
+        "is_emergency": true
+      },
+      "output": {
+        "access_level": 2,
+        "can_grant": true,
+        "required_approvers": [
+          "Line Manager",
+          "IT Admin"
+        ],
+        "approver_count": 2,
+        "emergency_override": true,
+        "notes": [
+          "Level 2 có thể cấp tạm thời với approval đồng thời của Line Manager và IT Admin on-call."
+        ],
+        "source": "access_control_sop.txt"
+      },
+      "error": null,
+      "timestamp": "2026-04-14T00:51:23.266838"
+    }
+  ],
+  "final_answer": "[1] [MOCK] Không thể query ChromaDB: Error code: 401 - {'error': {'message': 'Incorrect API key provided: ssk-proj*********************************************************************************************************************************************************s2cA. You can find your API key at https://platform.openai.com/account/api-keys.', 'type': 'invalid_request_error', 'param': None, 'code': 'invalid_api_key'}}. Kết quả giả lập.\n\nKet qua kiem tra quyen truy cap:\n- Access level: 2\n- Can grant: True\n- Required approvers: ['Line Manager', 'IT Admin']\n- Emergency override: True\n- Level 2 có thể cấp tạm thời với approval đồng thời của Line Manager và IT Admin on-call.\n\nNguon: mock_data",
+  "sources": [
+    "mock_data"
+  ],
+  "confidence": 0.5,
+  "history": [
+    "[supervisor] received task: Ticket P1 lúc 2am. Cần cấp Level 2 access tạm thời cho contractor. Nêu đủ cả hai",
+    "[supervisor] route=policy_tool_worker reason=multi-hop: task contains BOTH SLA and access control keywords → policy_tool_worker (will also retrieve) | risk_high flagged due to: ['2am', 'tạm thời', 'contractor']",
+    "[retrieval_worker] ERROR: Error code: 401 - {'error': {'message': 'Incorrect API key provided: ssk-proj*********************************************************************************************************************************************************s2cA. You can find your API key at https://platform.openai.com/account/api-keys.', 'type': 'invalid_request_error', 'param': None, 'code': 'invalid_api_key'}}",
+    "[policy_tool_worker] called MCP search_kb",
+    "[policy_tool_worker] called MCP get_ticket_info",
+    "[policy_tool_worker] called MCP check_access_permission(level=2)",
+    "[policy_tool_worker] policy_applies=True, exceptions=0",
+    "[synthesis_worker] answer generated, confidence=0.5, sources=['mock_data']",
+    "[graph] completed in 1752ms"
+  ],
+  "workers_called": [
+    "retrieval_worker",
+    "policy_tool_worker",
+    "synthesis_worker"
+  ],
+  "supervisor_route": "policy_tool_worker",
+  "latency_ms": 1752,
+  "run_id": "run_20260414_005122",
+  "worker_io_logs": [
+    {
+      "worker": "retrieval_worker",
+      "input": {
+        "task": "Ticket P1 lúc 2am. Cần cấp Level 2 access tạm thời cho contractor. Nêu đủ cả hai quy trình.",
+        "top_k": 3
+      },
+      "output": null,
+      "error": {
+        "code": "RETRIEVAL_FAILED",
+        "reason": "Error code: 401 - {'error': {'message': 'Incorrect API key provided: ssk-proj*********************************************************************************************************************************************************s2cA. You can find your API key at https://platform.openai.com/account/api-keys.', 'type': 'invalid_request_error', 'param': None, 'code': 'invalid_api_key'}}"
+      }
+    },
+    {
+      "worker": "policy_tool_worker",
+      "input": {
+        "task": "Ticket P1 lúc 2am. Cần cấp Level 2 access tạm thời cho contractor. Nêu đủ cả hai quy trình.",
+        "chunks_count": 0,
+        "needs_tool": true
+      },
+      "output": {
+        "policy_applies": true,
+        "exceptions_count": 0,
+        "mcp_calls": 3
+      },
+      "error": null
+    },
+    {
+      "worker": "synthesis_worker",
+      "input": {
+        "task": "Ticket P1 lúc 2am. Cần cấp Level 2 access tạm thời cho contractor. Nêu đủ cả hai quy trình.",
+        "chunks_count": 1,
+        "has_policy": true
+      },
+      "output": {
+        "answer_length": 700,
+        "sources": [
+          "mock_data"
+        ],
+        "confidence": 0.5
+      },
+      "error": null
+    }
+  ]
+}

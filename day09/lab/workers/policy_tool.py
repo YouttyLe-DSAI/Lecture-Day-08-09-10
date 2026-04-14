@@ -1,5 +1,6 @@
 """
 workers/policy_tool.py — Policy & Tool Worker
+Owner: Ly (Worker Owner), Nam (MCP Owner)
 Sprint 2+3: Kiểm tra policy dựa vào context, gọi MCP tools khi cần.
 
 Input (từ AgentState):
@@ -192,11 +193,38 @@ def run(state: dict) -> dict:
         policy_result = analyze_policy(task, chunks)
         state["policy_result"] = policy_result
 
-        # Step 3: Nếu cần thêm info từ MCP (e.g., ticket status), gọi get_ticket_info
-        if needs_tool and any(kw in task.lower() for kw in ["ticket", "p1", "jira"]):
+        # Step 3: Gọi thêm MCP tools khi cần
+        task_lower = task.lower()
+        
+        # Gọi get_ticket_info nếu liên quan ticket/P1
+        if needs_tool and any(kw in task_lower for kw in ["ticket", "p1", "jira", "sự cố"]):
             mcp_result = _call_mcp_tool("get_ticket_info", {"ticket_id": "P1-LATEST"})
             state["mcp_tools_used"].append(mcp_result)
             state["history"].append(f"[{WORKER_NAME}] called MCP get_ticket_info")
+        
+        # Gọi check_access_permission nếu liên quan access level
+        if needs_tool and any(kw in task_lower for kw in ["cấp quyền", "access", "level 2", "level 3", "permission"]):
+            # Detect access level from task
+            access_level = 2  # default
+            if "level 3" in task_lower or "admin" in task_lower:
+                access_level = 3
+            elif "level 1" in task_lower:
+                access_level = 1
+            
+            is_emergency = any(kw in task_lower for kw in ["emergency", "khẩn cấp", "p1", "2am", "tạm thời"])
+            requester_role = "contractor" if "contractor" in task_lower else "employee"
+            
+            mcp_result = _call_mcp_tool("check_access_permission", {
+                "access_level": access_level,
+                "requester_role": requester_role,
+                "is_emergency": is_emergency,
+            })
+            state["mcp_tools_used"].append(mcp_result)
+            state["history"].append(f"[{WORKER_NAME}] called MCP check_access_permission(level={access_level})")
+            
+            # Merge access check result into policy_result
+            if mcp_result.get("output"):
+                state["policy_result"]["access_check"] = mcp_result["output"]
 
         worker_io["output"] = {
             "policy_applies": policy_result["policy_applies"],

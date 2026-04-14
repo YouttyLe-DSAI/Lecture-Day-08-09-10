@@ -1,5 +1,6 @@
 """
 workers/retrieval.py — Retrieval Worker
+Owner: Ly (Worker Owner)
 Sprint 2: Implement retrieval từ ChromaDB, trả về chunks + sources.
 
 Input (từ AgentState):

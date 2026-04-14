@@ -1,5 +1,6 @@
 """
 mcp_server.py — Mock MCP Server
+Owner: Nam (MCP Owner)
 Sprint 3: Implement ít nhất 2 MCP tools.
 
 Mô phỏng MCP (Model Context Protocol) interface trong Python.

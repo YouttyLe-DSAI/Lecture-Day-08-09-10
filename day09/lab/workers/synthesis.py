@@ -1,5 +1,6 @@
 """
 workers/synthesis.py — Synthesis Worker
+Owner: Ly (Worker Owner)
 Sprint 2: Tổng hợp câu trả lời từ retrieved_chunks và policy_result.
 
 Input (từ AgentState):
@@ -17,6 +18,14 @@ Gọi độc lập để test:
 """
 
 import os
+import sys
+
+# Fix Windows encoding
+if sys.platform == "win32":
+    try:
+        sys.stdout.reconfigure(encoding='utf-8', errors='replace')
+    except Exception:
+        pass
 
 WORKER_NAME = "synthesis_worker"
 
@@ -31,38 +40,90 @@ Quy tắc nghiêm ngặt:
 """
 
 
-def _call_llm(messages: list) -> str:
+def _call_llm(messages: list, chunks: list = None, policy_result: dict = None) -> str:
     """
     Gọi LLM để tổng hợp câu trả lời.
-    TODO Sprint 2: Implement với OpenAI hoặc Gemini.
+    Fallback: trích xuất câu trả lời trực tiếp từ context nếu không có LLM.
     """
     # Option A: OpenAI
-    try:
-        from openai import OpenAI
-        client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
-        response = client.chat.completions.create(
-            model="gpt-4o-mini",
-            messages=messages,
-            temperature=0.1,  # Low temperature để grounded
-            max_tokens=500,
-        )
-        return response.choices[0].message.content
-    except Exception:
-        pass
+    openai_key = os.getenv("OPENAI_API_KEY", "")
+    if openai_key and not openai_key.startswith("sk-..."):
+        try:
+            from openai import OpenAI
+            client = OpenAI(api_key=openai_key)
+            response = client.chat.completions.create(
+                model="gpt-4o-mini",
+                messages=messages,
+                temperature=0.1,
+                max_tokens=500,
+            )
+            return response.choices[0].message.content
+        except Exception:
+            pass
 
     # Option B: Gemini
-    try:
-        import google.generativeai as genai
-        genai.configure(api_key=os.getenv("GOOGLE_API_KEY"))
-        model = genai.GenerativeModel("gemini-1.5-flash")
-        combined = "\n".join([m["content"] for m in messages])
-        response = model.generate_content(combined)
-        return response.text
-    except Exception:
-        pass
+    google_key = os.getenv("GOOGLE_API_KEY", "")
+    if google_key and not google_key.startswith("AI..."):
+        try:
+            import google.generativeai as genai
+            genai.configure(api_key=google_key)
+            model = genai.GenerativeModel("gemini-1.5-flash")
+            combined = "\n".join([m["content"] for m in messages])
+            response = model.generate_content(combined)
+            return response.text
+        except Exception:
+            pass
 
-    # Fallback: trả về message báo lỗi (không hallucinate)
-    return "[SYNTHESIS ERROR] Không thể gọi LLM. Kiểm tra API key trong .env."
+    # Fallback: Context-based extraction (no hallucination)
+    return _extract_answer_from_context(chunks or [], policy_result or {})
+
+
+def _extract_answer_from_context(chunks: list, policy_result: dict) -> str:
+    """
+    Trích xuất câu trả lời trực tiếp từ context khi không có LLM.
+    Đảm bảo grounded — chỉ dùng thông tin từ chunks.
+    """
+    if not chunks:
+        return "Không đủ thông tin trong tài liệu nội bộ để trả lời câu hỏi này."
+    
+    parts = []
+    sources_cited = set()
+    
+    # Add relevant chunks as evidence
+    for i, chunk in enumerate(chunks, 1):
+        source = chunk.get("source", "unknown")
+        text = chunk.get("text", "").strip()
+        if text:
+            parts.append(f"[{i}] {text}")
+            sources_cited.add(source)
+    
+    # Add policy exceptions if any
+    if policy_result.get("exceptions_found"):
+        parts.append("\nNgoai le phat hien:")
+        for ex in policy_result["exceptions_found"]:
+            parts.append(f"- {ex.get('rule', '')}")
+    
+    # Add policy version note if any
+    if policy_result.get("policy_version_note"):
+        parts.append(f"\nLuu y: {policy_result['policy_version_note']}")
+    
+    # Add access check results if any
+    if policy_result.get("access_check"):
+        ac = policy_result["access_check"]
+        parts.append(f"\nKet qua kiem tra quyen truy cap:")
+        parts.append(f"- Access level: {ac.get('access_level', '?')}")
+        parts.append(f"- Can grant: {ac.get('can_grant', '?')}")
+        parts.append(f"- Required approvers: {ac.get('required_approvers', [])}")
+        parts.append(f"- Emergency override: {ac.get('emergency_override', False)}")
+        if ac.get("notes"):
+            for note in ac["notes"]:
+                parts.append(f"- {note}")
+    
+    # Citation footer
+    if sources_cited:
+        parts.append(f"\nNguon: {', '.join(sorted(sources_cited))}")
+    
+    return "\n".join(parts)
 
 
 def _build_context(chunks: list, policy_result: dict) -> str:
@@ -138,7 +199,7 @@ Hãy trả lời câu hỏi dựa vào tài liệu trên."""
         }
     ]
 
-    answer = _call_llm(messages)
+    answer = _call_llm(messages, chunks=chunks, policy_result=policy_result)
     sources = list({c.get("source", "unknown") for c in chunks})
     confidence = _estimate_confidence(chunks, answer, policy_result)
 
